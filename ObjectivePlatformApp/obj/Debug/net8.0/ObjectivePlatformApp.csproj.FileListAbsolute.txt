@@ -231,3 +231,4 @@ C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 сем
 C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 семестр\Учебная практика\ObjectivePlatformApp\ObjectivePlatformApp\obj\Debug\net8.0\Objectiv.D4F61600.Up2Date
 C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 семестр\Учебная практика\ObjectivePlatformApp\ObjectivePlatformApp\obj\Debug\net8.0\ObjectivePlatformApp.genruntimeconfig.cache
 C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 семестр\Учебная практика\ObjectivePlatformApp\ObjectivePlatformApp\obj\Debug\net8.0\ref\ObjectivePlatformApp.dll
+C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 семестр\Учебная практика\ObjectivePlatformApp\ObjectivePlatformApp\obj\Debug\net8.0\ObjectivePlatformApp.sourcelink.json

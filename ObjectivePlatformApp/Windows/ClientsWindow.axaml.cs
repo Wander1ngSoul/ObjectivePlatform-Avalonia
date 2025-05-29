@@ -38,9 +38,9 @@ namespace ObjectivePlatformApp
                         Margin = new Thickness(5)
                     };
 
-                    grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));        
-                    grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));      
-                    grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));        
+                    grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+                    grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
+                    grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
 
                     var clientText = new TextBlock
                     {
@@ -76,19 +76,26 @@ namespace ObjectivePlatformApp
             }
         }
 
-
         private void CreateClient_Click(object? sender, RoutedEventArgs e)
         {
-            // Заглушка для создания клиента
-            Console.WriteLine("Создание клиента");
+            var newClient = new Clients();
+            var mainWindow = (MainWindow)TopLevel.GetTopLevel(this)!;
+            mainWindow.Content = new EditClient(newClient, true);
         }
 
         private void EditClient_Click(object? sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is int clientId)
             {
-                // Заглушка для редактирования клиента
-                Console.WriteLine($"Редактирование клиента с ID: {clientId}");
+                using (var db = new AppDbContext())
+                {
+                    var client = db.Clients.FirstOrDefault(c => c.Id == clientId);
+                    if (client != null)
+                    {
+                        var mainWindow = (MainWindow)TopLevel.GetTopLevel(this)!;
+                        mainWindow.Content = new EditClient(client);
+                    }
+                }
             }
         }
 
@@ -103,7 +110,7 @@ namespace ObjectivePlatformApp
                     {
                         db.Clients.Remove(client);
                         db.SaveChanges();
-                        LoadClients(); // Обновить список
+                        LoadClients();
                     }
                 }
             }

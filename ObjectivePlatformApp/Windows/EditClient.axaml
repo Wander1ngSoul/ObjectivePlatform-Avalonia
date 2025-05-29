@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
+             x:Class="ObjectivePlatformApp.EditClient">
+	<StackPanel Margin="20" Spacing="10">
+		<!-- Кнопка вернуться -->
+		<Button x:Name="BackButton" Content="← Вернуться" HorizontalAlignment="Left"/>
+
+		<!-- ФИО -->
+		<TextBlock Text="Имя*:"/>
+		<TextBox x:Name="FirstNameTextBox"/>
+		<TextBlock x:Name="FirstNameError" Foreground="Red" TextWrapping="Wrap"/>
+
+		<TextBlock Text="Фамилия*:"/>
+		<TextBox x:Name="LastNameTextBox"/>
+		<TextBlock x:Name="LastNameError" Foreground="Red" TextWrapping="Wrap"/>
+
+		<TextBlock Text="Отчество:"/>
+		<TextBox x:Name="MiddleNameTextBox"/>
+		<TextBlock x:Name="MiddleNameError" Foreground="Red" TextWrapping="Wrap"/>
+
+		<!-- Email -->
+		<TextBlock Text="Email*:"/>
+		<TextBox x:Name="EmailTextBox"/>
+		<TextBlock x:Name="EmailError" Foreground="Red" TextWrapping="Wrap"/>
+
+		<!-- Телефон -->
+		<TextBlock Text="Телефон*:"/>
+		<TextBox x:Name="PhoneTextBox"/>
+		<TextBlock x:Name="PhoneError" Foreground="Red" TextWrapping="Wrap"/>
+
+		<!-- Кнопки -->
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+			<Button x:Name="SaveButton" Content="Сохранить" Width="100" IsEnabled="False"/>
+			<Button x:Name="CancelButton" Content="Отмена" Width="100"/>
+		</StackPanel>
+	</StackPanel>
+</UserControl>
