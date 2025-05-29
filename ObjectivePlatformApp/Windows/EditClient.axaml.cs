@@ -15,7 +15,6 @@ public partial class EditClient : UserControl
     private bool _isNewClient;
     private bool _isValid = false;
 
-    // Регулярные выражения для валидации
     private readonly Regex _nameRegex = new Regex(@"^[А-ЯЁа-яёA-Za-z\-]+$");
     private readonly Regex _emailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
     private readonly Regex _phoneRegex = new Regex(@"^\+?\d{10,15}$");
@@ -24,7 +23,6 @@ public partial class EditClient : UserControl
     {
         InitializeComponent();
 
-        // Подключаем обработчики событий
         BackButton.Click += BackButton_Click;
         SaveButton.Click += SaveButton_Click;
         CancelButton.Click += CancelButton_Click;
@@ -32,8 +30,8 @@ public partial class EditClient : UserControl
         FirstNameTextBox.TextChanged += NameTextBox_TextChanged;
         LastNameTextBox.TextChanged += NameTextBox_TextChanged;
         MiddleNameTextBox.TextChanged += NameTextBox_TextChanged;
-        EmailTextBox.TextChanged += EmailTextBox_TextChanged;
-        PhoneTextBox.TextChanged += PhoneTextBox_TextChanged;
+        EmailTextBox.TextChanged += ContactInfo_TextChanged;
+        PhoneTextBox.TextChanged += ContactInfo_TextChanged;
     }
 
     public EditClient(Clients client, bool isNewClient = false) : this()
@@ -92,8 +90,6 @@ public partial class EditClient : UserControl
         mainWindow.Content = new ClientsWindow();
     }
 
-    #region Валидация полей
-
     private void NameTextBox_TextChanged(object? sender, TextChangedEventArgs e)
     {
         var textBox = sender as TextBox;
@@ -110,8 +106,6 @@ public partial class EditClient : UserControl
         if (textBox == null || errorTextBlock == null) return;
 
         var text = textBox.Text?.Trim() ?? "";
-
-        // Для отчества валидация необязательна
         if (textBox.Name == nameof(MiddleNameTextBox) && string.IsNullOrEmpty(text))
         {
             errorTextBlock.Text = "";
@@ -135,63 +129,84 @@ public partial class EditClient : UserControl
         ValidateAllFields();
     }
 
-    private void EmailTextBox_TextChanged(object? sender, TextChangedEventArgs e)
+    private void ContactInfo_TextChanged(object? sender, TextChangedEventArgs e)
     {
-        var text = EmailTextBox.Text?.Trim() ?? "";
-        if (string.IsNullOrWhiteSpace(text))
+        var textBox = sender as TextBox;
+        if (textBox == null) return;
+
+        if (textBox.Name == nameof(EmailTextBox))
         {
-            EmailError.Text = "Email обязателен для заполнения";
+            var text = EmailTextBox.Text?.Trim() ?? "";
+            if (!string.IsNullOrWhiteSpace(text) && !_emailRegex.IsMatch(text))
+            {
+                EmailError.Text = "Введите корректный email (например: example@mail.com)";
+            }
+            else
+            {
+                EmailError.Text = "";
+            }
         }
-        else if (!_emailRegex.IsMatch(text))
+        else if (textBox.Name == nameof(PhoneTextBox))
         {
-            EmailError.Text = "Введите корректный email (например: example@mail.com)";
-        }
-        else
-        {
-            EmailError.Text = "";
+            var text = PhoneTextBox.Text?.Trim() ?? "";
+            if (!string.IsNullOrWhiteSpace(text) && !_phoneRegex.IsMatch(text))
+            {
+                PhoneError.Text = "Введите корректный телефон (например: +71234567890 или 1234567890)";
+            }
+            else
+            {
+                PhoneError.Text = "";
+            }
         }
 
+        ValidateContactInfo();
         ValidateAllFields();
     }
 
-    private void PhoneTextBox_TextChanged(object? sender, TextChangedEventArgs e)
+    private void ValidateContactInfo()
     {
-        var text = PhoneTextBox.Text?.Trim() ?? "";
-        if (string.IsNullOrWhiteSpace(text))
+        bool hasEmail = !string.IsNullOrWhiteSpace(EmailTextBox.Text);
+        bool hasPhone = !string.IsNullOrWhiteSpace(PhoneTextBox.Text);
+
+        if (!hasEmail && !hasPhone)
         {
-            PhoneError.Text = "Телефон обязателен для заполнения";
-        }
-        else if (!_phoneRegex.IsMatch(text))
-        {
-            PhoneError.Text = "Введите корректный телефон (например: +71234567890 или 1234567890)";
+            EmailError.Text = "Необходимо указать email или телефон";
+            PhoneError.Text = "Необходимо указать email или телефон";
         }
         else
         {
-            PhoneError.Text = "";
+            if (string.IsNullOrEmpty(EmailError.Text) || EmailError.Text == "Необходимо указать email или телефон")
+            {
+                EmailError.Text = "";
+            }
+            if (string.IsNullOrEmpty(PhoneError.Text) || PhoneError.Text == "Необходимо указать email или телефон")
+            {
+                PhoneError.Text = "";
+            }
         }
-
-        ValidateAllFields();
     }
 
     private void ValidateAllFields()
     {
-        // Проверяем обязательные поля
         bool firstNameValid = !string.IsNullOrWhiteSpace(FirstNameTextBox.Text) &&
                             _nameRegex.IsMatch(FirstNameTextBox.Text.Trim());
         bool lastNameValid = !string.IsNullOrWhiteSpace(LastNameTextBox.Text) &&
                            _nameRegex.IsMatch(LastNameTextBox.Text.Trim());
-        bool emailValid = !string.IsNullOrWhiteSpace(EmailTextBox.Text) &&
+
+        bool contactInfoValid = (!string.IsNullOrWhiteSpace(EmailTextBox.Text) ||
+                              (!string.IsNullOrWhiteSpace(PhoneTextBox.Text)));
+
+        bool emailValid = string.IsNullOrWhiteSpace(EmailTextBox.Text) ||
                          _emailRegex.IsMatch(EmailTextBox.Text.Trim());
-        bool phoneValid = !string.IsNullOrWhiteSpace(PhoneTextBox.Text) &&
+
+        bool phoneValid = string.IsNullOrWhiteSpace(PhoneTextBox.Text) ||
                         _phoneRegex.IsMatch(PhoneTextBox.Text.Trim());
 
-        // Отчество необязательно, но если заполнено - должно быть валидным
         bool middleNameValid = string.IsNullOrWhiteSpace(MiddleNameTextBox.Text) ||
                              _nameRegex.IsMatch(MiddleNameTextBox.Text.Trim());
 
-        _isValid = firstNameValid && lastNameValid && middleNameValid && emailValid && phoneValid;
+        _isValid = firstNameValid && lastNameValid && middleNameValid &&
+                  contactInfoValid && emailValid && phoneValid;
         SaveButton.IsEnabled = _isValid;
     }
-
-    #endregion
 }
