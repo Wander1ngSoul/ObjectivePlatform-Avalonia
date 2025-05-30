@@ -3,33 +3,28 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="400"
-             x:Class="ObjectivePlatformApp.EditClient"
+             x:Class="ObjectivePlatformApp.EditAgent"
              HorizontalAlignment="Center"
              VerticalAlignment="Center"
-             Foreground="Black"
-			 >
+             Foreground="Black">
 	<StackPanel Margin="5" Spacing="2">
 		<Button x:Name="BackButton" Content="Назад" HorizontalAlignment="Left"/>
 
-		<TextBlock Text="Фамилия:"/>
+		<TextBlock Text="Фамилия*:"/>
 		<TextBox x:Name="LastNameTextBox"/>
 		<TextBlock x:Name="LastNameError" Foreground="Red" TextWrapping="Wrap"/>
 
-		<TextBlock Text="Имя:"/>
+		<TextBlock Text="Имя*:"/>
 		<TextBox x:Name="FirstNameTextBox"/>
 		<TextBlock x:Name="FirstNameError" Foreground="Red" TextWrapping="Wrap"/>
 
-		<TextBlock Text="Отчество:"/>
+		<TextBlock Text="Отчество*:"/>
 		<TextBox x:Name="MiddleNameTextBox"/>
 		<TextBlock x:Name="MiddleNameError" Foreground="Red" TextWrapping="Wrap"/>
 
-		<TextBlock Text="Электронная почта:"/>
-		<TextBox x:Name="EmailTextBox"/>
-		<TextBlock x:Name="EmailError" Foreground="Red" TextWrapping="Wrap"/>
-
-		<TextBlock Text="Номер телефона:"/>
-		<TextBox x:Name="PhoneTextBox"/>
-		<TextBlock x:Name="PhoneError" Foreground="Red" TextWrapping="Wrap"/>
+		<TextBlock Text="Комиссия (%)*:"/>
+		<TextBox x:Name="CommissionTextBox"/>
+		<TextBlock x:Name="CommissionError" Foreground="Red" TextWrapping="Wrap"/>
 
 		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,10,0,0">
 			<Button x:Name="SaveButton" Content="Сохранить" Width="100" IsEnabled="False"/>

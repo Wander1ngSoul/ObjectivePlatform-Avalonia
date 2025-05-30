@@ -19,7 +19,17 @@ namespace ObjectivePlatformApp
             var createButton = this.FindControl<Button>("CreateClientButton");
             createButton.Click += CreateClient_Click;
 
+            var backButton = this.FindControl<Button>("BackButton");
+            backButton.Click += BackButton_Click;
+
             LoadClients();
+        }
+
+        private void BackButton_Click(object? sender, RoutedEventArgs e)
+        {
+            var mainWindow = new MainWindow();
+            mainWindow.Show();
+            (TopLevel.GetTopLevel(this) as Window)?.Close();
         }
 
         private void LoadClients()
@@ -108,6 +118,29 @@ namespace ObjectivePlatformApp
                     var client = db.Clients.FirstOrDefault(c => c.Id == clientId);
                     if (client != null)
                     {
+                        // Check if client has any demands or offers
+                        bool hasDemands = db.Demands.Any(d => d.ClientId == clientId);
+                        bool hasOffers = db.Offers.Any(o => o.ClientId == clientId);
+
+                        if (hasDemands || hasOffers)
+                        {
+                            // Show error message
+                            var errorWindow = new Window
+                            {
+                                Title = "Ошибка",
+                                Content = new TextBlock
+                                {
+                                    Text = "Невозможно удалить клиента, так как он связан с потребностью или предложением.",
+                                    Margin = new Thickness(20),
+                                    TextWrapping = TextWrapping.Wrap
+                                },
+                                SizeToContent = SizeToContent.WidthAndHeight,
+                                WindowStartupLocation = WindowStartupLocation.CenterOwner
+                            };
+                            errorWindow.ShowDialog(TopLevel.GetTopLevel(this) as Window);
+                            return;
+                        }
+
                         db.Clients.Remove(client);
                         db.SaveChanges();
                         LoadClients();

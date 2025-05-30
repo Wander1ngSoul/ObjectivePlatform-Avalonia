@@ -35,7 +35,13 @@ build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 [C:/Users/ignat/OneDrive/Рабочий стол/Важное/3 курс/2 семестр/Учебная практика/ObjectivePlatformApp/ObjectivePlatformApp/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
+[C:/Users/ignat/OneDrive/Рабочий стол/Важное/3 курс/2 семестр/Учебная практика/ObjectivePlatformApp/ObjectivePlatformApp/Windows/AgentsWindow.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
 [C:/Users/ignat/OneDrive/Рабочий стол/Важное/3 курс/2 семестр/Учебная практика/ObjectivePlatformApp/ObjectivePlatformApp/Windows/ClientsWindow.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[C:/Users/ignat/OneDrive/Рабочий стол/Важное/3 курс/2 семестр/Учебная практика/ObjectivePlatformApp/ObjectivePlatformApp/Windows/EditAgents.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
 [C:/Users/ignat/OneDrive/Рабочий стол/Важное/3 курс/2 семестр/Учебная практика/ObjectivePlatformApp/ObjectivePlatformApp/Windows/EditClient.axaml]

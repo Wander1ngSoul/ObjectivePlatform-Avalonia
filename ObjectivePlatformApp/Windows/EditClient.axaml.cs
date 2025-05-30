@@ -22,7 +22,6 @@ public partial class EditClient : UserControl
     public EditClient()
     {
         InitializeComponent();
-
         BackButton.Click += BackButton_Click;
         SaveButton.Click += SaveButton_Click;
         CancelButton.Click += CancelButton_Click;
@@ -93,37 +92,20 @@ public partial class EditClient : UserControl
     private void NameTextBox_TextChanged(object? sender, TextChangedEventArgs e)
     {
         var textBox = sender as TextBox;
-        var fieldName = textBox?.Name switch
-        {
-            nameof(FirstNameTextBox) => "Имя",
-            nameof(LastNameTextBox) => "Фамилия",
-            nameof(MiddleNameTextBox) => "Отчество",
-            _ => string.Empty
-        };
+        if (textBox == null) return;
 
-        var errorTextBlock = this.FindControl<TextBlock>($"{textBox?.Name}Error");
-
-        if (textBox == null || errorTextBlock == null) return;
+        var errorTextBlock = this.FindControl<TextBlock>($"{textBox.Name}Error");
+        if (errorTextBlock == null) return;
 
         var text = textBox.Text?.Trim() ?? "";
-        if (textBox.Name == nameof(MiddleNameTextBox) && string.IsNullOrEmpty(text))
+
+        if (!string.IsNullOrWhiteSpace(text) && !_nameRegex.IsMatch(text))
         {
-            errorTextBlock.Text = "";
+            errorTextBlock.Text = "Может содержать только буквы и дефис";
         }
         else
         {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                errorTextBlock.Text = $"{fieldName} обязательно для заполнения";
-            }
-            else if (!_nameRegex.IsMatch(text))
-            {
-                errorTextBlock.Text = $"{fieldName} может содержать только буквы и дефис";
-            }
-            else
-            {
-                errorTextBlock.Text = "";
-            }
+            errorTextBlock.Text = "";
         }
 
         ValidateAllFields();
@@ -175,38 +157,32 @@ public partial class EditClient : UserControl
         }
         else
         {
-            if (string.IsNullOrEmpty(EmailError.Text) || EmailError.Text == "Необходимо указать email или телефон")
-            {
+            if (EmailError.Text == "Необходимо указать email или телефон")
                 EmailError.Text = "";
-            }
-            if (string.IsNullOrEmpty(PhoneError.Text) || PhoneError.Text == "Необходимо указать email или телефон")
-            {
+            if (PhoneError.Text == "Необходимо указать email или телефон")
                 PhoneError.Text = "";
-            }
         }
     }
 
     private void ValidateAllFields()
     {
-        bool firstNameValid = !string.IsNullOrWhiteSpace(FirstNameTextBox.Text) &&
+        bool emailValid = string.IsNullOrWhiteSpace(EmailTextBox.Text) ||
+                         _emailRegex.IsMatch(EmailTextBox.Text.Trim());
+        bool phoneValid = string.IsNullOrWhiteSpace(PhoneTextBox.Text) ||
+                        _phoneRegex.IsMatch(PhoneTextBox.Text.Trim());
+
+        bool firstNameValid = string.IsNullOrWhiteSpace(FirstNameTextBox.Text) ||
                             _nameRegex.IsMatch(FirstNameTextBox.Text.Trim());
-        bool lastNameValid = !string.IsNullOrWhiteSpace(LastNameTextBox.Text) &&
+        bool lastNameValid = string.IsNullOrWhiteSpace(LastNameTextBox.Text) ||
                            _nameRegex.IsMatch(LastNameTextBox.Text.Trim());
+        bool middleNameValid = string.IsNullOrWhiteSpace(MiddleNameTextBox.Text) ||
+                             _nameRegex.IsMatch(MiddleNameTextBox.Text.Trim());
 
         bool contactInfoValid = (!string.IsNullOrWhiteSpace(EmailTextBox.Text) ||
                               (!string.IsNullOrWhiteSpace(PhoneTextBox.Text)));
 
-        bool emailValid = string.IsNullOrWhiteSpace(EmailTextBox.Text) ||
-                         _emailRegex.IsMatch(EmailTextBox.Text.Trim());
-
-        bool phoneValid = string.IsNullOrWhiteSpace(PhoneTextBox.Text) ||
-                        _phoneRegex.IsMatch(PhoneTextBox.Text.Trim());
-
-        bool middleNameValid = string.IsNullOrWhiteSpace(MiddleNameTextBox.Text) ||
-                             _nameRegex.IsMatch(MiddleNameTextBox.Text.Trim());
-
-        _isValid = firstNameValid && lastNameValid && middleNameValid &&
-                  contactInfoValid && emailValid && phoneValid;
+        _isValid = emailValid && phoneValid && contactInfoValid &&
+                  firstNameValid && lastNameValid && middleNameValid;
         SaveButton.IsEnabled = _isValid;
     }
 }

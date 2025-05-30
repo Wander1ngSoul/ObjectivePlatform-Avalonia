@@ -9,6 +9,7 @@ namespace ObjectivePlatformApp
         public MainWindow()
         {
             InitializeComponent();
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
             NavigateButton.Click += NavigateButton_Click;
         }
 
@@ -21,13 +22,16 @@ namespace ObjectivePlatformApp
                 switch (selected)
                 {
                     case "Клиенты":
-                        MainContent.Content = new ClientsWindow();
-                       
+                        var mainWindowClients = (MainWindow)TopLevel.GetTopLevel(this);
+                        mainWindowClients.Content = new ClientsWindow();
                         break;
 
+                    case "Агенты":
+                        var mainWindowAgents = (MainWindow)TopLevel.GetTopLevel(this);
+                        mainWindowAgents.Content = new AgentsWindow();
+                        break;
 
                     default:
-                        MainContent.Content = null; 
                         break;
                 }
             }
