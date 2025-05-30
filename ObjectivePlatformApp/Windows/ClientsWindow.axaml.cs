@@ -8,11 +8,14 @@ using ObjectivePlatformApp.Models;
 using System.Linq;
 using System;
 using Avalonia.Media;
+using System.Collections.Generic;
 
 namespace ObjectivePlatformApp
 {
     public partial class ClientsWindow : UserControl
     {
+        private List<Clients> _allClients = new List<Clients>();
+
         public ClientsWindow()
         {
             InitializeComponent();
@@ -36,54 +39,116 @@ namespace ObjectivePlatformApp
         {
             using (var db = new AppDbContext())
             {
-                var clients = db.Clients.ToList();
-                var clientsPanel = this.FindControl<StackPanel>("ClientsPanel");
+                _allClients = db.Clients.ToList();
+                FilterClients();
+            }
+        }
 
-                clientsPanel.Children.Clear();
+        private void FilterClients(string searchText = "")
+        {
+            var clientsPanel = this.FindControl<StackPanel>("ClientsPanel");
+            clientsPanel.Children.Clear();
 
-                foreach (var client in clients)
+            var filteredClients = string.IsNullOrWhiteSpace(searchText)
+                ? _allClients
+                : _allClients.Where(client =>
+                    IsMatch(client.FirstName, searchText) ||
+                    IsMatch(client.LastName, searchText) ||
+                    IsMatch(client.MiddleName ?? "", searchText)).ToList();
+
+            foreach (var client in filteredClients)
+            {
+                var grid = new Grid
                 {
-                    var grid = new Grid
-                    {
-                        Margin = new Thickness(5)
-                    };
+                    Margin = new Thickness(5)
+                };
 
-                    grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
-                    grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
-                    grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
+                grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+                grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
+                grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
 
-                    var clientText = new TextBlock
-                    {
-                        Text = $"{client.Id} - {client.FirstName} {client.LastName} - {client.MiddleName} - {client.Email} - {client.Phone}",
-                        TextWrapping = TextWrapping.Wrap,
-                        Margin = new Thickness(0, 0, 10, 0)
-                    };
-                    Grid.SetColumn(clientText, 0);
+                var clientText = new TextBlock
+                {
+                    Text = $"{client.Id} - {client.FirstName} {client.LastName} - {client.MiddleName} - {client.Email} - {client.Phone}",
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(0, 0, 10, 0)
+                };
+                Grid.SetColumn(clientText, 0);
 
-                    var editButton = new Button
-                    {
-                        Content = "Редактировать",
-                        Margin = new Thickness(0, 0, 5, 0),
-                        Tag = client.Id
-                    };
-                    editButton.Click += EditClient_Click;
-                    Grid.SetColumn(editButton, 1);
+                var editButton = new Button
+                {
+                    Content = "Редактировать",
+                    Margin = new Thickness(0, 0, 5, 0),
+                    Tag = client.Id
+                };
+                editButton.Click += EditClient_Click;
+                Grid.SetColumn(editButton, 1);
 
-                    var deleteButton = new Button
-                    {
-                        Content = "Удалить",
-                        Tag = client.Id
-                    };
-                    deleteButton.Click += DeleteClient_Click;
-                    Grid.SetColumn(deleteButton, 2);
+                var deleteButton = new Button
+                {
+                    Content = "Удалить",
+                    Tag = client.Id
+                };
+                deleteButton.Click += DeleteClient_Click;
+                Grid.SetColumn(deleteButton, 2);
 
-                    grid.Children.Add(clientText);
-                    grid.Children.Add(editButton);
-                    grid.Children.Add(deleteButton);
+                grid.Children.Add(clientText);
+                grid.Children.Add(editButton);
+                grid.Children.Add(deleteButton);
 
-                    clientsPanel.Children.Add(grid);
+                clientsPanel.Children.Add(grid);
+            }
+        }
+
+        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var searchTextBox = sender as TextBox;
+            FilterClients(searchTextBox?.Text ?? "");
+        }
+
+        // Метод для проверки соответствия строки с использованием расстояния Левенштейна
+        private bool IsMatch(string source, string target)
+        {
+            if (string.IsNullOrEmpty(source)) return false;
+            if (string.IsNullOrEmpty(target)) return false;
+
+            source = source.ToLower();
+            target = target.ToLower();
+
+            // Если есть точное совпадение (включая частичное)
+            if (source.Contains(target) || target.Contains(source))
+                return true;
+
+            // Проверяем расстояние Левенштейна
+            return LevenshteinDistance(source, target) <= 3;
+        }
+
+        // Алгоритм вычисления расстояния Левенштейна
+        private int LevenshteinDistance(string s, string t)
+        {
+            int n = s.Length;
+            int m = t.Length;
+            int[,] d = new int[n + 1, m + 1];
+
+            if (n == 0) return m;
+            if (m == 0) return n;
+
+            for (int i = 0; i <= n; d[i, 0] = i++) { }
+            for (int j = 0; j <= m; d[0, j] = j++) { }
+
+            for (int i = 1; i <= n; i++)
+            {
+                for (int j = 1; j <= m; j++)
+                {
+                    int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
+
+                    d[i, j] = Math.Min(
+                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                        d[i - 1, j - 1] + cost);
                 }
             }
+
+            return d[n, m];
         }
 
         private void CreateClient_Click(object? sender, RoutedEventArgs e)
