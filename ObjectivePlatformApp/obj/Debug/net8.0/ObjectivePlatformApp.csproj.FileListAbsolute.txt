@@ -5,6 +5,7 @@ C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 сем
 C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 семестр\Учебная практика\ObjectivePlatformApp\ObjectivePlatformApp\obj\Debug\net8.0\ObjectivePlatformApp.AssemblyInfoInputs.cache
 C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 семестр\Учебная практика\ObjectivePlatformApp\ObjectivePlatformApp\obj\Debug\net8.0\ObjectivePlatformApp.AssemblyInfo.cs
 C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 семестр\Учебная практика\ObjectivePlatformApp\ObjectivePlatformApp\obj\Debug\net8.0\ObjectivePlatformApp.csproj.CoreCompileInputs.cache
+C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 семестр\Учебная практика\ObjectivePlatformApp\ObjectivePlatformApp\obj\Debug\net8.0\ObjectivePlatformApp.sourcelink.json
 C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 семестр\Учебная практика\ObjectivePlatformApp\ObjectivePlatformApp\bin\Debug\net8.0\ObjectivePlatformApp.exe
 C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 семестр\Учебная практика\ObjectivePlatformApp\ObjectivePlatformApp\bin\Debug\net8.0\ObjectivePlatformApp.deps.json
 C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 семестр\Учебная практика\ObjectivePlatformApp\ObjectivePlatformApp\bin\Debug\net8.0\ObjectivePlatformApp.runtimeconfig.json
@@ -231,4 +232,3 @@ C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 сем
 C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 семестр\Учебная практика\ObjectivePlatformApp\ObjectivePlatformApp\obj\Debug\net8.0\Objectiv.D4F61600.Up2Date
 C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 семестр\Учебная практика\ObjectivePlatformApp\ObjectivePlatformApp\obj\Debug\net8.0\ObjectivePlatformApp.genruntimeconfig.cache
 C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 семестр\Учебная практика\ObjectivePlatformApp\ObjectivePlatformApp\obj\Debug\net8.0\ref\ObjectivePlatformApp.dll
-C:\Users\ignat\OneDrive\Рабочий стол\Важное\3 курс\2 семестр\Учебная практика\ObjectivePlatformApp\ObjectivePlatformApp\obj\Debug\net8.0\ObjectivePlatformApp.sourcelink.json

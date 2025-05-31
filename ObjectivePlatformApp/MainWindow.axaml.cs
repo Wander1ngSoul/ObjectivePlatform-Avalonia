@@ -30,7 +30,10 @@ namespace ObjectivePlatformApp
                         var mainWindowAgents = (MainWindow)TopLevel.GetTopLevel(this);
                         mainWindowAgents.Content = new AgentsWindow();
                         break;
-
+                    case "Объекты недвижимости":
+                        var mainWindowRealEstates = (MainWindow)TopLevel.GetTopLevel(this);
+                        mainWindowRealEstates.Content = new RealEstatesWindow();
+                        break;
                     default:
                         break;
                 }

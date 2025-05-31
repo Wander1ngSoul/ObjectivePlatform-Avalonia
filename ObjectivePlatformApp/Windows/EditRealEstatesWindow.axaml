@@ -1,0 +1,57 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
+             x:Class="ObjectivePlatformApp.EditRealEstatesWindow"
+             HorizontalAlignment="Center"
+             VerticalAlignment="Center"
+             Foreground="Black">
+
+	<ScrollViewer VerticalScrollBarVisibility="Auto">
+		<StackPanel Margin="10" Spacing="5">
+			<Button x:Name="BackButton" Content="Назад" HorizontalAlignment="Left" Click="BackButton_Click"/>
+
+			<TextBlock Text="Город:"/>
+			<TextBox x:Name="CityTextBox" TextChanged="Field_TextChanged"/>
+			<TextBlock x:Name="CityError" Foreground="Red" TextWrapping="Wrap"/>
+
+			<TextBlock Text="Улица:"/>
+			<TextBox x:Name="StreetTextBox" TextChanged="Field_TextChanged"/>
+			<TextBlock x:Name="StreetError" Foreground="Red" TextWrapping="Wrap"/>
+
+			<TextBlock Text="Дом:"/>
+			<TextBox x:Name="HouseTextBox" TextChanged="Field_TextChanged"/>
+			<TextBlock x:Name="HouseError" Foreground="Red" TextWrapping="Wrap"/>
+
+			<TextBlock Text="Квартира:"/>
+			<TextBox x:Name="FlatTextBox" TextChanged="Field_TextChanged"/>
+			<TextBlock x:Name="FlatError" Foreground="Red" TextWrapping="Wrap"/>
+
+			<TextBlock Text="Этаж:"/>
+			<TextBox x:Name="FloorTextBox" TextChanged="Field_TextChanged"/>
+			<TextBlock x:Name="FloorError" Foreground="Red" TextWrapping="Wrap"/>
+
+			<TextBlock Text="Количество комнат:"/>
+			<TextBox x:Name="RoomsTextBox" TextChanged="Field_TextChanged"/>
+			<TextBlock x:Name="RoomsError" Foreground="Red" TextWrapping="Wrap"/>
+
+			<TextBlock Text="Площадь (м²):"/>
+			<TextBox x:Name="AreaTextBox" TextChanged="Field_TextChanged"/>
+			<TextBlock x:Name="AreaError" Foreground="Red" TextWrapping="Wrap"/>
+
+			<TextBlock Text="Широта:"/>
+			<TextBox x:Name="LatitudeTextBox" TextChanged="Field_TextChanged"/>
+			<TextBlock x:Name="LatitudeError" Foreground="Red" TextWrapping="Wrap"/>
+
+			<TextBlock Text="Долгота:"/>
+			<TextBox x:Name="LongitudeTextBox" TextChanged="Field_TextChanged"/>
+			<TextBlock x:Name="LongitudeError" Foreground="Red" TextWrapping="Wrap"/>
+
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,20">
+				<Button x:Name="SaveButton" Content="Сохранить" Width="100" IsEnabled="False" Click="SaveButton_Click"/>
+				<Button x:Name="CancelButton" Content="Отмена" Width="100" Click="CancelButton_Click"/>
+			</StackPanel>
+		</StackPanel>
+	</ScrollViewer>
+</UserControl>
