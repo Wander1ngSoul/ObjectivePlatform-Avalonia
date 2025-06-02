@@ -3,7 +3,7 @@
         xmlns:local="clr-namespace:ObjectivePlatformApp"
         x:Class="ObjectivePlatformApp.MainWindow"
         Title="Информационная система - недвидвмжимость"
-        Width="800" Height="600"
+        Width="1000" Height="600"
         FontFamily="Segoe UI"
 		Foreground="Black">
 

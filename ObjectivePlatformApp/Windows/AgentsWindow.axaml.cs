@@ -9,6 +9,7 @@ using System.Linq;
 using System;
 using Avalonia.Media;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace ObjectivePlatformApp
 {
@@ -170,19 +171,113 @@ namespace ObjectivePlatformApp
             }
         }
 
-        private void DeleteAgent_Click(object? sender, RoutedEventArgs e)
+        private async void DeleteAgent_Click(object? sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is int agentId)
             {
+                // Создаем диалоговое окно подтверждения
+                var confirmDialog = new Window
+                {
+                    Title = "Подтверждение удаления",
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                    MinWidth = 300
+                };
+
+                var stackPanel = new StackPanel
+                {
+                    Margin = new Thickness(20)
+                };
+
                 using (var db = new AppDbContext())
                 {
-                    var agent = db.Agents.FirstOrDefault(a => a.Id == agentId);
-                    if (agent != null)
+                    var agent = db.Agents
+                        .Include(a => a.Demands)
+                        .Include(a => a.Offers)
+                        .FirstOrDefault(a => a.Id == agentId);
+
+                    if (agent == null) return;
+
+                    // Проверка на связанные записи
+                    bool hasActiveOffers = db.Offers.Any(o => o.AgentId == agentId);
+                    bool hasActiveDemands = db.Demands.Any(d => d.AgentId == agentId);
+                    bool hasDeals = db.Deals.Any(d =>
+                        d.Offer.AgentId == agentId ||
+                        d.Demand.AgentId == agentId);
+
+                    if (hasActiveOffers || hasActiveDemands || hasDeals)
+                    {
+                        stackPanel.Children.Add(new TextBlock
+                        {
+                            Text = "Невозможно удалить агента, так как он связан с активными предложениями, потребностями или сделками.",
+                            TextWrapping = TextWrapping.Wrap,
+                            Margin = new Thickness(0, 0, 0, 20),
+                            FontSize = 16
+                        });
+
+                        var okButton = new Button { Content = "OK", HorizontalAlignment = HorizontalAlignment.Center };
+                        okButton.Click += (s, args) => confirmDialog.Close();
+                        stackPanel.Children.Add(okButton);
+                        confirmDialog.Content = stackPanel;
+                        await confirmDialog.ShowDialog(TopLevel.GetTopLevel(this) as Window);
+                        return;
+                    }
+
+                    // Добавляем текст подтверждения
+                    stackPanel.Children.Add(new TextBlock
+                    {
+                        Text = $"Вы уверены, что хотите удалить агента:\n{agent.LastName} {agent.FirstName} {agent.MiddleName}?",
+                        TextWrapping = TextWrapping.Wrap,
+                        Margin = new Thickness(0, 0, 0, 20),
+                        FontSize = 16
+                    });
+
+                    // Добавляем кнопки подтверждения
+                    var buttonsPanel = new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        Spacing = 10
+                    };
+
+                    var yesButton = new Button { Content = "Да" };
+                    var noButton = new Button { Content = "Нет" };
+
+                    yesButton.Click += async (s, args) =>
                     {
                         db.Agents.Remove(agent);
                         db.SaveChanges();
                         LoadAgents();
-                    }
+                        confirmDialog.Close();
+
+                        // Показываем сообщение об успешном удалении
+                        var successWindow = new Window
+                        {
+                            Title = "Успешно",
+                            Content = new TextBlock
+                            {
+                                Text = $"Агент {agent.LastName} {agent.FirstName} успешно удален.",
+                                Margin = new Thickness(20),
+                                TextWrapping = TextWrapping.Wrap,
+                                FontSize = 16
+                            },
+                            SizeToContent = SizeToContent.WidthAndHeight,
+                            WindowStartupLocation = WindowStartupLocation.CenterOwner
+                        };
+                        await successWindow.ShowDialog(TopLevel.GetTopLevel(this) as Window);
+                    };
+
+                    noButton.Click += (s, args) =>
+                    {
+                        confirmDialog.Close();
+                    };
+
+                    buttonsPanel.Children.Add(yesButton);
+                    buttonsPanel.Children.Add(noButton);
+                    stackPanel.Children.Add(buttonsPanel);
+                    confirmDialog.Content = stackPanel;
+
+                    await confirmDialog.ShowDialog(TopLevel.GetTopLevel(this) as Window);
                 }
             }
         }

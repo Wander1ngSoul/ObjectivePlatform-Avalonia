@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using Avalonia.Markup.Xaml;
 using Avalonia.Interactivity;
 using ObjectivePlatformApp.Data;
 using ObjectivePlatformApp.Models;
@@ -106,7 +105,6 @@ namespace ObjectivePlatformApp
             FilterClients(searchTextBox?.Text ?? "");
         }
 
-        // Метод для проверки соответствия строки с использованием расстояния Левенштейна
         private bool IsMatch(string source, string target)
         {
             if (string.IsNullOrEmpty(source)) return false;
@@ -115,15 +113,12 @@ namespace ObjectivePlatformApp
             source = source.ToLower();
             target = target.ToLower();
 
-            // Если есть точное совпадение (включая частичное)
             if (source.Contains(target) || target.Contains(source))
                 return true;
 
-            // Проверяем расстояние Левенштейна
             return LevenshteinDistance(source, target) <= 3;
         }
 
-        // Алгоритм вычисления расстояния Левенштейна
         private int LevenshteinDistance(string s, string t)
         {
             int n = s.Length;
@@ -174,7 +169,7 @@ namespace ObjectivePlatformApp
             }
         }
 
-        private void DeleteClient_Click(object? sender, RoutedEventArgs e)
+        private async void DeleteClient_Click(object? sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is int clientId)
             {
@@ -183,13 +178,11 @@ namespace ObjectivePlatformApp
                     var client = db.Clients.FirstOrDefault(c => c.Id == clientId);
                     if (client != null)
                     {
-                        // Check if client has any demands or offers
                         bool hasDemands = db.Demands.Any(d => d.ClientId == clientId);
                         bool hasOffers = db.Offers.Any(o => o.ClientId == clientId);
 
                         if (hasDemands || hasOffers)
                         {
-                            // Show error message
                             var errorWindow = new Window
                             {
                                 Title = "Ошибка",
@@ -197,18 +190,80 @@ namespace ObjectivePlatformApp
                                 {
                                     Text = "Невозможно удалить клиента, так как он связан с потребностью или предложением.",
                                     Margin = new Thickness(20),
-                                    TextWrapping = TextWrapping.Wrap
+                                    TextWrapping = TextWrapping.Wrap,
+                                    FontSize = 16
+                                },
+                                SizeToContent = SizeToContent.WidthAndHeight,
+                                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                                MinWidth = 350
+                            };
+                            await errorWindow.ShowDialog(TopLevel.GetTopLevel(this) as Window);
+                            return;
+                        }
+                        var confirmDialog = new Window
+                        {
+                            Title = "Подтверждение удаления",
+                            SizeToContent = SizeToContent.WidthAndHeight,
+                            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                            MinWidth = 300
+                        };
+
+                        var stackPanel = new StackPanel
+                        {
+                            Margin = new Thickness(20)
+                        };
+
+                        stackPanel.Children.Add(new TextBlock
+                        {
+                            Text = $"Вы уверены, что хотите удалить клиента:\n{client.LastName} {client.FirstName} {client.MiddleName}?",
+                            TextWrapping = TextWrapping.Wrap,
+                            Margin = new Thickness(0, 0, 0, 20)
+                        });
+
+                        var buttonsPanel = new StackPanel
+                        {
+                            Orientation = Orientation.Horizontal,
+                            HorizontalAlignment = HorizontalAlignment.Right,
+                            Spacing = 10
+                        };
+
+                        var yesButton = new Button { Content = "Да" };
+                        var noButton = new Button { Content = "Нет" };
+
+                        yesButton.Click += async (s, args) =>
+                        {
+                            db.Clients.Remove(client);
+                            db.SaveChanges();
+                            LoadClients();
+                            confirmDialog.Close();
+
+                            var successWindow = new Window
+                            {
+                                Title = "Успешно",
+                                Content = new TextBlock
+                                {
+                                    Text = $"Клиент {client.LastName} {client.FirstName} успешно удален.",
+                                    Margin = new Thickness(20),
+                                    TextWrapping = TextWrapping.Wrap,
+                                    FontSize = 16
                                 },
                                 SizeToContent = SizeToContent.WidthAndHeight,
                                 WindowStartupLocation = WindowStartupLocation.CenterOwner
                             };
-                            errorWindow.ShowDialog(TopLevel.GetTopLevel(this) as Window);
-                            return;
-                        }
+                            await successWindow.ShowDialog(TopLevel.GetTopLevel(this) as Window);
+                        };
 
-                        db.Clients.Remove(client);
-                        db.SaveChanges();
-                        LoadClients();
+                        noButton.Click += (s, args) =>
+                        {
+                            confirmDialog.Close();
+                        };
+
+                        buttonsPanel.Children.Add(yesButton);
+                        buttonsPanel.Children.Add(noButton);
+                        stackPanel.Children.Add(buttonsPanel);
+                        confirmDialog.Content = stackPanel;
+
+                        await confirmDialog.ShowDialog(TopLevel.GetTopLevel(this) as Window);
                     }
                 }
             }

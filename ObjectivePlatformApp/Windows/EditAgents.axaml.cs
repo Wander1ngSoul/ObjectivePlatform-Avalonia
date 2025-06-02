@@ -6,6 +6,7 @@ using ObjectivePlatformApp.Data;
 using ObjectivePlatformApp.Models;
 using System.Text.RegularExpressions;
 using System;
+using Avalonia.Media;
 
 namespace ObjectivePlatformApp
 {
@@ -16,7 +17,7 @@ namespace ObjectivePlatformApp
         private bool _isValid = false;
 
         private readonly Regex _nameRegex = new Regex(@"^[А-ЯЁа-яёA-Za-z\-]+$");
-        private readonly Regex _commissionRegex = new Regex(@"^\d{1,3}$");
+        private readonly Regex _commissionRegex = new Regex(@"^[0-9]*$"); // Разрешаем только цифры при вводе
 
         public EditAgent()
         {
@@ -28,16 +29,30 @@ namespace ObjectivePlatformApp
             LastNameTextBox.TextInput += NameTextBox_TextInput;
             FirstNameTextBox.TextInput += NameTextBox_TextInput;
             MiddleNameTextBox.TextInput += NameTextBox_TextInput;
+            CommissionTextBox.TextInput += CommissionTextBox_TextInput;
 
             LastNameTextBox.TextChanged += NameTextBox_TextChanged;
             FirstNameTextBox.TextChanged += NameTextBox_TextChanged;
             MiddleNameTextBox.TextChanged += NameTextBox_TextChanged;
             CommissionTextBox.TextChanged += CommissionTextBox_TextChanged;
+
+            LastNameTextBox.LostFocus += NameTextBox_LostFocus;
+            FirstNameTextBox.LostFocus += NameTextBox_LostFocus;
+            MiddleNameTextBox.LostFocus += NameTextBox_LostFocus;
+            CommissionTextBox.LostFocus += CommissionTextBox_LostFocus;
         }
 
         private void NameTextBox_TextInput(object? sender, Avalonia.Input.TextInputEventArgs e)
         {
             if (sender is TextBox textBox && !_nameRegex.IsMatch(e.Text))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void CommissionTextBox_TextInput(object? sender, Avalonia.Input.TextInputEventArgs e)
+        {
+            if (sender is TextBox textBox && !_commissionRegex.IsMatch(e.Text))
             {
                 e.Handled = true;
             }
@@ -53,6 +68,10 @@ namespace ObjectivePlatformApp
             MiddleNameTextBox.Text = agent.MiddleName;
             CommissionTextBox.Text = agent.Commision.ToString();
 
+            ValidateNameField(LastNameTextBox, LastNameError, "Фамилия");
+            ValidateNameField(FirstNameTextBox, FirstNameError, "Имя");
+            ValidateNameField(MiddleNameTextBox, MiddleNameError, "Отчество");
+            ValidateCommissionField();
             ValidateAllFields();
         }
 
@@ -85,6 +104,21 @@ namespace ObjectivePlatformApp
                     db.Agents.Update(_agent);
                 }
                 db.SaveChanges();
+                var successWindow = new Window
+                {
+                    Title = "Уведомление",
+                    Content = new TextBlock
+                    {
+                        Text = "Процесс выполнен успешно!",
+                        Margin = new Thickness(20),
+                        TextWrapping = TextWrapping.Wrap,
+                        FontSize = 16
+                    },
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                    MinWidth = 350
+                };
+                successWindow.ShowDialog(TopLevel.GetTopLevel(this) as Window);
             }
 
             NavigateBack();
@@ -103,19 +137,32 @@ namespace ObjectivePlatformApp
 
         private void NameTextBox_TextChanged(object? sender, TextChangedEventArgs e)
         {
-            var textBox = sender as TextBox;
-            var fieldName = textBox?.Name switch
+            if (sender is TextBox textBox)
             {
-                nameof(FirstNameTextBox) => "Имя",
-                nameof(LastNameTextBox) => "Фамилия",
-                nameof(MiddleNameTextBox) => "Отчество",
-                _ => string.Empty
-            };
+                var (errorTextBlock, fieldName) = GetErrorBlockAndFieldName(textBox);
+                if (errorTextBlock != null)
+                {
+                    ValidateNameField(textBox, errorTextBlock, fieldName);
+                }
+            }
+            ValidateAllFields();
+        }
 
-            var errorTextBlock = this.FindControl<TextBlock>($"{textBox?.Name}Error");
+        private void NameTextBox_LostFocus(object? sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                var (errorTextBlock, fieldName) = GetErrorBlockAndFieldName(textBox);
+                if (errorTextBlock != null)
+                {
+                    ValidateNameField(textBox, errorTextBlock, fieldName);
+                }
+            }
+            ValidateAllFields();
+        }
 
-            if (textBox == null || errorTextBlock == null) return;
-
+        private void ValidateNameField(TextBox textBox, TextBlock errorTextBlock, string fieldName)
+        {
             var text = textBox.Text?.Trim() ?? "";
 
             if (string.IsNullOrWhiteSpace(text))
@@ -130,11 +177,21 @@ namespace ObjectivePlatformApp
             {
                 errorTextBlock.Text = "";
             }
-
-            ValidateAllFields();
         }
 
         private void CommissionTextBox_TextChanged(object? sender, TextChangedEventArgs e)
+        {
+            ValidateCommissionField();
+            ValidateAllFields();
+        }
+
+        private void CommissionTextBox_LostFocus(object? sender, RoutedEventArgs e)
+        {
+            ValidateCommissionField();
+            ValidateAllFields();
+        }
+
+        private void ValidateCommissionField()
         {
             var text = CommissionTextBox.Text?.Trim() ?? "";
 
@@ -142,44 +199,37 @@ namespace ObjectivePlatformApp
             {
                 CommissionError.Text = "Комиссия обязательна для заполнения";
             }
-            else if (!_commissionRegex.IsMatch(text))
-            {
-                CommissionError.Text = "Комиссия должна быть числом от 0 до 100";
-            }
-            else if (int.TryParse(text, out int commission))
-            {
-                if (commission < 0 || commission > 100)
-                {
-                    CommissionError.Text = "Комиссия должна быть от 0 до 100%";
-                }
-                else
-                {
-                    CommissionError.Text = "";
-                }
-            }
-            else
+            else if (!int.TryParse(text, out int commission))
             {
                 CommissionError.Text = "Введите корректное число";
             }
+            else if (commission < 0 || commission > 100)
+            {
+                CommissionError.Text = "Комиссия должна быть от 0 до 100%";
+            }
+            else
+            {
+                CommissionError.Text = "";
+            }
+        }
 
-            ValidateAllFields();
+        private (TextBlock? errorTextBlock, string fieldName) GetErrorBlockAndFieldName(TextBox textBox)
+        {
+            return textBox.Name switch
+            {
+                nameof(FirstNameTextBox) => (FirstNameError, "Имя"),
+                nameof(LastNameTextBox) => (LastNameError, "Фамилия"),
+                nameof(MiddleNameTextBox) => (MiddleNameError, "Отчество"),
+                _ => (null, string.Empty)
+            };
         }
 
         private void ValidateAllFields()
         {
-            bool lastNameValid = !string.IsNullOrWhiteSpace(LastNameTextBox.Text) &&
-                               _nameRegex.IsMatch(LastNameTextBox.Text.Trim());
-
-            bool firstNameValid = !string.IsNullOrWhiteSpace(FirstNameTextBox.Text) &&
-                                _nameRegex.IsMatch(FirstNameTextBox.Text.Trim());
-
-            bool middleNameValid = !string.IsNullOrWhiteSpace(MiddleNameTextBox.Text) &&
-                                 _nameRegex.IsMatch(MiddleNameTextBox.Text.Trim());
-
-            bool commissionValid = !string.IsNullOrWhiteSpace(CommissionTextBox.Text) &&
-                                 _commissionRegex.IsMatch(CommissionTextBox.Text.Trim()) &&
-                                 int.TryParse(CommissionTextBox.Text, out int commission) &&
-                                 commission >= 0 && commission <= 100;
+            bool lastNameValid = string.IsNullOrEmpty(LastNameError.Text);
+            bool firstNameValid = string.IsNullOrEmpty(FirstNameError.Text);
+            bool middleNameValid = string.IsNullOrEmpty(MiddleNameError.Text);
+            bool commissionValid = string.IsNullOrEmpty(CommissionError.Text);
 
             _isValid = lastNameValid && firstNameValid && middleNameValid && commissionValid;
             SaveButton.IsEnabled = _isValid;

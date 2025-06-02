@@ -1,7 +1,5 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Layout;
-using Avalonia.Markup.Xaml;
 using Avalonia.Interactivity;
 using ObjectivePlatformApp.Data;
 using ObjectivePlatformApp.Models;
@@ -16,6 +14,7 @@ namespace ObjectivePlatformApp
     public partial class RealEstatesWindow : UserControl
     {
         private List<RealEstates> _allRealEstates = new List<RealEstates>();
+        private List<Point> _searchPolygon = new List<Point>();
 
         public RealEstatesWindow()
         {
@@ -48,6 +47,48 @@ namespace ObjectivePlatformApp
             }
         }
 
+        private static int LevenshteinDistance(string s, string t)
+        {
+            if (string.IsNullOrEmpty(s))
+                return string.IsNullOrEmpty(t) ? 0 : t.Length;
+            if (string.IsNullOrEmpty(t))
+                return s.Length;
+
+            int n = s.Length;
+            int m = t.Length;
+            int[,] d = new int[n + 1, m + 1];
+
+            for (int i = 0; i <= n; d[i, 0] = i++) ;
+            for (int j = 1; j <= m; d[0, j] = j++) ;
+
+            for (int i = 1; i <= n; i++)
+            {
+                for (int j = 1; j <= m; j++)
+                {
+                    int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
+                    d[i, j] = Math.Min(
+                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                        d[i - 1, j - 1] + cost);
+                }
+            }
+            return d[n, m];
+        }
+
+        private bool IsFuzzyMatch(string source, string target, int maxDistance)
+        {
+            if (string.IsNullOrEmpty(source))return false;
+            if (string.IsNullOrEmpty(target)) return false;
+
+            source = source.ToLower();
+            target = target.ToLower();
+
+            if (source.Contains(target) || target.Contains(source))
+                return true;
+
+            return LevenshteinDistance(source, target) <= maxDistance;
+        }
+
+
         private void FilterRealEstates(string searchText = "")
         {
             var realEstatesPanel = this.FindControl<StackPanel>("RealEstatesPanel");
@@ -56,36 +97,44 @@ namespace ObjectivePlatformApp
             var filteredRealEstates = string.IsNullOrWhiteSpace(searchText)
                 ? _allRealEstates
                 : _allRealEstates.Where(re =>
-                    IsMatch(re.City, searchText) ||
-                    IsMatch(re.Street, searchText) ||
-                    IsMatch(re.House.ToString(), searchText) ||
-                    IsMatch(re.Flat.ToString(), searchText)).ToList();
+                    IsFuzzyMatch(re.City, searchText, 3) ||
+                    IsFuzzyMatch(re.Street, searchText, 3) ||
+                    IsFuzzyMatch(re.House?.ToString(), searchText, 1) ||
+                    IsFuzzyMatch(re.Flat?.ToString(), searchText, 1)).ToList();
 
             foreach (var realEstate in filteredRealEstates)
             {
-                var grid = new Grid
+                var border = new Border
                 {
-                    Margin = new Thickness(5)
+                    Margin = new Thickness(0, 0, 0, 5),
+                    Padding = new Thickness(10),
+                    Background = Brushes.White,
+                    CornerRadius = new CornerRadius(5)
                 };
 
-                grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
-                grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
-                grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
+                var grid = new Grid
+                {
+                    ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto),
+                new ColumnDefinition(GridLength.Auto)
+            }
+                };
 
                 var realEstateText = new TextBlock
                 {
                     Text = $"{realEstate.Id} - {realEstate.City}, {realEstate.Street} {realEstate.House}/{realEstate.Flat} | " +
                            $"Тип: {realEstate.RealEstateType?.Name} | Район: {realEstate.District?.Name} | " +
-                           $"Этаж: {realEstate.Floor}, Комнат: {realEstate.Rooms}, Площадь: {realEstate.Area}м²",
-                    TextWrapping = TextWrapping.Wrap,
-                    Margin = new Thickness(0, 0, 10, 0)
+                           $"Площадь: {realEstate.Area} м² | Комнат: {realEstate.Rooms} | Этаж: {realEstate.Floor}",
+                    TextWrapping = TextWrapping.Wrap
                 };
                 Grid.SetColumn(realEstateText, 0);
 
                 var editButton = new Button
                 {
                     Content = "Редактировать",
-                    Margin = new Thickness(0, 0, 5, 0),
+                    Margin = new Thickness(5, 0, 5, 0),
                     Tag = realEstate.Id
                 };
                 editButton.Click += EditRealEstate_Click;
@@ -103,7 +152,8 @@ namespace ObjectivePlatformApp
                 grid.Children.Add(editButton);
                 grid.Children.Add(deleteButton);
 
-                realEstatesPanel.Children.Add(grid);
+                border.Child = grid;
+                realEstatesPanel.Children.Add(border);
             }
         }
 
@@ -113,45 +163,10 @@ namespace ObjectivePlatformApp
             FilterRealEstates(searchTextBox?.Text ?? "");
         }
 
-        private bool IsMatch(string source, string target)
+        public void SetSearchPolygon(List<Point> polygon)
         {
-            if (string.IsNullOrEmpty(source)) return false;
-            if (string.IsNullOrEmpty(target)) return false;
-
-            source = source.ToLower();
-            target = target.ToLower();
-
-            if (source.Contains(target) || target.Contains(source))
-                return true;
-
-            return LevenshteinDistance(source, target) <= 3;
-        }
-
-        private int LevenshteinDistance(string s, string t)
-        {
-            int n = s.Length;
-            int m = t.Length;
-            int[,] d = new int[n + 1, m + 1];
-
-            if (n == 0) return m;
-            if (m == 0) return n;
-
-            for (int i = 0; i <= n; d[i, 0] = i++) { }
-            for (int j = 0; j <= m; d[0, j] = j++) { }
-
-            for (int i = 1; i <= n; i++)
-            {
-                for (int j = 1; j <= m; j++)
-                {
-                    int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
-
-                    d[i, j] = Math.Min(
-                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
-                        d[i - 1, j - 1] + cost);
-                }
-            }
-
-            return d[n, m];
+            _searchPolygon = polygon;
+            FilterRealEstates();
         }
 
         private void CreateRealEstate_Click(object? sender, RoutedEventArgs e)
@@ -167,11 +182,7 @@ namespace ObjectivePlatformApp
             {
                 using (var db = new AppDbContext())
                 {
-                    var realEstate = db.RealEstates
-                        .Include(re => re.RealEstateType)
-                        .Include(re => re.District)
-                        .FirstOrDefault(re => re.Id == realEstateId);
-
+                    var realEstate = db.RealEstates.FirstOrDefault(re => re.Id == realEstateId);
                     if (realEstate != null)
                     {
                         var mainWindow = (MainWindow)TopLevel.GetTopLevel(this)!;
@@ -181,42 +192,96 @@ namespace ObjectivePlatformApp
             }
         }
 
-        private void DeleteRealEstate_Click(object? sender, RoutedEventArgs e)
+        private async void DeleteRealEstate_Click(object? sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is int realEstateId)
             {
-                using (var db = new AppDbContext())
+                // Создаем диалог подтверждения
+                var confirmDialog = new Window
                 {
-                    var realEstate = db.RealEstates.FirstOrDefault(re => re.Id == realEstateId);
-                    if (realEstate != null)
+                    Title = "Подтверждение удаления",
+                    Width = 300,
+                    Height = 150,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                };
+
+                var stackPanel = new StackPanel
+                {
+                    Margin = new Thickness(10),
+                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+                };
+
+                var textBlock = new TextBlock
+                {
+                    Text = "Вы уверены, что хотите удалить этот объект недвижимости?",
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(0, 0, 0, 10)
+                };
+
+                var buttonPanel = new StackPanel
+                {
+                    Orientation = Avalonia.Layout.Orientation.Horizontal,
+                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                    Spacing = 10
+                };
+
+                var yesButton = new Button
+                {
+                    Content = "Да",
+                    Width = 80
+                };
+
+                var noButton = new Button
+                {
+                    Content = "Нет",
+                    Width = 80
+                };
+
+                yesButton.Click += async (s, args) =>
+                {
+                    using (var db = new AppDbContext())
                     {
-                        bool hasDemands = db.Demands.Any(d => d.Id == realEstateId);
-                        bool hasOffers = db.Offers.Any(o => o.Id == realEstateId);
-
-                        if (hasDemands || hasOffers)
+                        var realEstate = db.RealEstates.FirstOrDefault(re => re.Id == realEstateId);
+                        if (realEstate != null)
                         {
-                            var errorWindow = new Window
-                            {
-                                Title = "Ошибка",
-                                Content = new TextBlock
-                                {
-                                    Text = "Невозможно удалить объект недвижимости, так как он связан с потребностью или предложением.",
-                                    Margin = new Thickness(20),
-                                    TextWrapping = TextWrapping.Wrap
-                                },
-                                SizeToContent = SizeToContent.WidthAndHeight,
-                                WindowStartupLocation = WindowStartupLocation.CenterOwner
-                            };
-                            errorWindow.ShowDialog(TopLevel.GetTopLevel(this) as Window);
-                            return;
+                            db.RealEstates.Remove(realEstate);
+                            db.SaveChanges();
+                            LoadRealEstates();
                         }
-
-                        db.RealEstates.Remove(realEstate);
-                        db.SaveChanges();
-                        LoadRealEstates();
                     }
-                }
+                    confirmDialog.Close();
+                };
+
+                noButton.Click += (s, args) =>
+                {
+                    confirmDialog.Close();
+                };
+
+                buttonPanel.Children.Add(yesButton);
+                buttonPanel.Children.Add(noButton);
+
+                stackPanel.Children.Add(textBlock);
+                stackPanel.Children.Add(buttonPanel);
+
+                confirmDialog.Content = stackPanel;
+
+                var parentWindow = TopLevel.GetTopLevel(this) as Window;
+
+                await confirmDialog.ShowDialog(parentWindow);
             }
+        }
+    }
+
+    public class Point
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+
+        public Point(double x, double y)
+        {
+            X = x;
+            Y = y;
         }
     }
 }

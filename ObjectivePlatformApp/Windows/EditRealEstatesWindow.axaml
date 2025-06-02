@@ -1,57 +1,87 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="700"
+			 Width="800"
+			 Height="600"
              x:Class="ObjectivePlatformApp.EditRealEstatesWindow"
              HorizontalAlignment="Center"
              VerticalAlignment="Center"
              Foreground="Black">
 
-	<ScrollViewer VerticalScrollBarVisibility="Auto">
-		<StackPanel Margin="10" Spacing="5">
-			<Button x:Name="BackButton" Content="Назад" HorizontalAlignment="Left" Click="BackButton_Click"/>
+	<StackPanel Margin="50" Spacing="5" Width="750">
+		<Button x:Name="BackButton" Content="Назад" HorizontalAlignment="Left"/>
 
-			<TextBlock Text="Город:"/>
-			<TextBox x:Name="CityTextBox" TextChanged="Field_TextChanged"/>
-			<TextBlock x:Name="CityError" Foreground="Red" TextWrapping="Wrap"/>
-
-			<TextBlock Text="Улица:"/>
-			<TextBox x:Name="StreetTextBox" TextChanged="Field_TextChanged"/>
-			<TextBlock x:Name="StreetError" Foreground="Red" TextWrapping="Wrap"/>
-
-			<TextBlock Text="Дом:"/>
-			<TextBox x:Name="HouseTextBox" TextChanged="Field_TextChanged"/>
-			<TextBlock x:Name="HouseError" Foreground="Red" TextWrapping="Wrap"/>
-
-			<TextBlock Text="Квартира:"/>
-			<TextBox x:Name="FlatTextBox" TextChanged="Field_TextChanged"/>
-			<TextBlock x:Name="FlatError" Foreground="Red" TextWrapping="Wrap"/>
-
-			<TextBlock Text="Этаж:"/>
-			<TextBox x:Name="FloorTextBox" TextChanged="Field_TextChanged"/>
-			<TextBlock x:Name="FloorError" Foreground="Red" TextWrapping="Wrap"/>
-
-			<TextBlock Text="Количество комнат:"/>
-			<TextBox x:Name="RoomsTextBox" TextChanged="Field_TextChanged"/>
-			<TextBlock x:Name="RoomsError" Foreground="Red" TextWrapping="Wrap"/>
-
-			<TextBlock Text="Площадь (м²):"/>
-			<TextBox x:Name="AreaTextBox" TextChanged="Field_TextChanged"/>
-			<TextBlock x:Name="AreaError" Foreground="Red" TextWrapping="Wrap"/>
-
-			<TextBlock Text="Широта:"/>
-			<TextBox x:Name="LatitudeTextBox" TextChanged="Field_TextChanged"/>
-			<TextBlock x:Name="LatitudeError" Foreground="Red" TextWrapping="Wrap"/>
-
-			<TextBlock Text="Долгота:"/>
-			<TextBox x:Name="LongitudeTextBox" TextChanged="Field_TextChanged"/>
-			<TextBlock x:Name="LongitudeError" Foreground="Red" TextWrapping="Wrap"/>
-
-			<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,20">
-				<Button x:Name="SaveButton" Content="Сохранить" Width="100" IsEnabled="False" Click="SaveButton_Click"/>
-				<Button x:Name="CancelButton" Content="Отмена" Width="100" Click="CancelButton_Click"/>
-			</StackPanel>
+		<StackPanel Spacing="10">
+			<TextBlock Text="Тип недвижимости:"/>
+			<ComboBox x:Name="TablesComboBox" Width="300">
+				<ComboBoxItem Content="Дом"/>
+				<ComboBoxItem Content="Земля"/>
+				<ComboBoxItem Content="Квартира"/>
+			</ComboBox>
+			<TextBlock x:Name="TypeError" Foreground="Red" TextWrapping="Wrap"/>
 		</StackPanel>
-	</ScrollViewer>
+
+		<Grid ColumnDefinitions="*,20,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+			<StackPanel Grid.Column="0" Grid.Row="0">
+				<TextBlock Text="Город:"/>
+				<TextBox x:Name="CityTextBox" Width="350"/>
+				<TextBlock x:Name="CityError" Foreground="Red" TextWrapping="Wrap"/>
+			</StackPanel>
+
+			<StackPanel Grid.Column="0" Grid.Row="1">
+				<TextBlock Text="Улица:"/>
+				<TextBox x:Name="StreetTextBox" Width="350"/>
+				<TextBlock x:Name="StreetError" Foreground="Red" TextWrapping="Wrap"/>
+			</StackPanel>
+
+			<StackPanel Grid.Column="0" Grid.Row="2">
+				<TextBlock Text="Дом:"/>
+				<TextBox x:Name="HouseTextBox" Width="350"/>
+				<TextBlock x:Name="HouseError" Foreground="Red" TextWrapping="Wrap"/>
+			</StackPanel>
+
+			<StackPanel Grid.Column="0" Grid.Row="3">
+				<TextBlock Text="Квартира:"/>
+				<TextBox x:Name="FlatTextBox" Width="350"/>
+				<TextBlock x:Name="FlatError" Foreground="Red" TextWrapping="Wrap"/>
+			</StackPanel>
+
+			<StackPanel Grid.Column="0" Grid.Row="4">
+				<TextBlock Text="Этаж:"/>
+				<TextBox x:Name="FloorTextBox" Width="350"/>
+				<TextBlock x:Name="FloorError" Foreground="Red" TextWrapping="Wrap"/>
+			</StackPanel>
+
+			<StackPanel Grid.Column="2" Grid.Row="0">
+				<TextBlock Text="Количество комнат:"/>
+				<TextBox x:Name="RoomsTextBox" Width="350"/>
+				<TextBlock x:Name="RoomsError" Foreground="Red" TextWrapping="Wrap"/>
+			</StackPanel>
+
+			<StackPanel Grid.Column="2" Grid.Row="1">
+				<TextBlock Text="Площадь (м²):"/>
+				<TextBox x:Name="AreaTextBox" Width="350"/>
+				<TextBlock x:Name="AreaError" Foreground="Red" TextWrapping="Wrap"/>
+			</StackPanel>
+
+			<StackPanel Grid.Column="2" Grid.Row="2">
+				<TextBlock Text="Широта: (-90 : 90)"/>
+				<TextBox x:Name="LatitudeTextBox" Width="350"/>
+				<TextBlock x:Name="LatitudeError" Foreground="Red" TextWrapping="Wrap"/>
+			</StackPanel>
+
+			<StackPanel Grid.Column="2" Grid.Row="3">
+				<TextBlock Text="Долгота: (-180 : 180)"/>
+				<TextBox x:Name="LongitudeTextBox" Width="350"/>
+				<TextBlock x:Name="LongitudeError" Foreground="Red" TextWrapping="Wrap"/>
+			</StackPanel>
+		</Grid>
+
+		<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="15" Margin="0,0,0,0">
+			<Button x:Name="SaveButton" Content="Сохранить" Width="120" Height="35"/>
+			<Button x:Name="CancelButton" Content="Отмена" Width="120" Height="35"/>
+		</StackPanel>
+	</StackPanel>
 </UserControl>
